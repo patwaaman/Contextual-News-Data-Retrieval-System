@@ -67,7 +67,7 @@ MongoDB        mongodb://localhost:27017
 docker compose logs -f app
 ```
 
-##🌐 REST API Documentation
+## 🌐 REST API Documentation
 ```text
 Postman Collection added: import it.
 
@@ -141,13 +141,14 @@ The LLM:
 
 ## 🧠 Intent-Aware Ranking Logic
 ```text
-Intent	Ranking Strategy
-search	relevance_score + text match score
-category	most recent publication
-source	most recent publication
-score	highest relevance_score
-nearby	shortest distance (Haversine)
-🧠 LLM Usage Strategy
+Intent:	   Ranking Strategy
+search:	   relevance_score + text match score
+category:  most recent publication
+source:	   most recent publication
+score:	   highest relevance_score
+nearby:    shortest distance (Haversine)
+
+LLM Usage Strategy
 
 Used for:
 
