@@ -1,0 +1,203 @@
+{
+	"info": {
+		"_postman_id": "6a3f63a3-8bdd-4dc6-bb81-a55dc5642b62",
+		"name": "Contextual News Data Retrieval API",
+		"description": "Postman collection for Contextual News Data Retrieval System with LLM-powered intent parsing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12182606"
+	},
+	"item": [
+		{
+			"name": "Search New (LLM-Powered)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/news/semantic?query=news near me",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"news",
+						"semantic"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "news near me"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search News",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/news/search?query=Elon Musk Twitter acquisition 123&page=1&limit=10",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"news",
+						"search"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "Elon Musk Twitter acquisition 123"
+						},
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "limit",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search by Category",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/news/category?query=technology",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"news",
+						"category"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "technology"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search by Source",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/news/source?query=Hindustan Times",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"news",
+						"source"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "Hindustan Times"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search by Relevance Score",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/news/score?query=0.7&limit=50&page=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"news",
+						"score"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "0.7"
+						},
+						{
+							"key": "limit",
+							"value": "50"
+						},
+						{
+							"key": "page",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Nearby News (Location Based)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/news/nearby?lat=16.34977&lon=79.723996&radius=50",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"news",
+						"nearby"
+					],
+					"query": [
+						{
+							"key": "lat",
+							"value": "16.34977"
+						},
+						{
+							"key": "lon",
+							"value": "79.723996"
+						},
+						{
+							"key": "radius",
+							"value": "50"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
