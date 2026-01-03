@@ -12,6 +12,9 @@ var (
 	ErrInvalidLimit       = errors.New("invalid limit value")
 	ErrLimitExceed        = errors.New("limit exceeds max allowed")
 	ErrRadiusExceed       = errors.New("radius exceeds max allowed")
+	ErrInvalidScoreValue  = errors.New("score must be a valid number")
+	ErrScoreThreshold     = errors.New("score must be between 0.7 and 1.0")
+	ErrLatLonRequired     = errors.New("lat and lon parameters are required")
 )
 
 // News retrieval errors

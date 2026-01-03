@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 	"news-retrieval/dto"
 	"news-retrieval/helper"
 	"news-retrieval/model"
@@ -23,8 +24,33 @@ func (s *NewsServiceImpl) Search(ctx context.Context, query string, pgn model.Pa
 	if err != nil {
 		return dto.NewsResponseDTO{}, err
 	}
+	helper.ComputeTextScores(articles, query)
+	helper.RankArticles(articles, "search")
 
-	return buildPaginatedResponse(query, articles, pgn), nil
+	paged, total := paginate(articles, pgn)
+
+	for i := range paged {
+		paged[i].Description = s.llm.Summarize(ctx, paged[i].Description)
+	}
+
+	for i, a := range articles {
+		log.Printf(
+			"[rank][search] #%d title=%q relevance=%.2f textScore=%.2f final=%.2f",
+			i+1,
+			a.Title,
+			a.RelevanceScore,
+			a.TextScore,
+			a.RelevanceScore+a.TextScore,
+		)
+	}
+
+	return dto.BuildNewsResponse(
+		query,
+		pgn.Page,
+		pgn.Limit,
+		total,
+		paged,
+	), nil
 }
 
 func (s *NewsServiceImpl) Category(ctx context.Context, category string, pgn model.Pagination) (dto.NewsResponseDTO, error) {
@@ -33,8 +59,21 @@ func (s *NewsServiceImpl) Category(ctx context.Context, category string, pgn mod
 	if err != nil {
 		return dto.NewsResponseDTO{}, err
 	}
+	helper.RankArticles(articles, "category")
 
-	return buildPaginatedResponse(category, articles, pgn), nil
+	paged, total := paginate(articles, pgn)
+
+	for i := range paged {
+		paged[i].Description = s.llm.Summarize(ctx, paged[i].Description)
+	}
+
+	return dto.BuildNewsResponse(
+		category,
+		pgn.Page,
+		pgn.Limit,
+		total,
+		paged,
+	), nil
 }
 
 func (s *NewsServiceImpl) Source(ctx context.Context, source string, pgn model.Pagination) (dto.NewsResponseDTO, error) {
@@ -42,8 +81,21 @@ func (s *NewsServiceImpl) Source(ctx context.Context, source string, pgn model.P
 	if err != nil {
 		return dto.NewsResponseDTO{}, err
 	}
+	helper.RankArticles(articles, "source")
 
-	return buildPaginatedResponse(source, articles, pgn), nil
+	paged, total := paginate(articles, pgn)
+
+	for i := range paged {
+		paged[i].Description = s.llm.Summarize(ctx, paged[i].Description)
+	}
+
+	return dto.BuildNewsResponse(
+		source,
+		pgn.Page,
+		pgn.Limit,
+		total,
+		paged,
+	), nil
 }
 
 func (s *NewsServiceImpl) Score(ctx context.Context, score float64, pgn model.Pagination) (dto.NewsResponseDTO, error) {
@@ -51,11 +103,23 @@ func (s *NewsServiceImpl) Score(ctx context.Context, score float64, pgn model.Pa
 	if err != nil {
 		return dto.NewsResponseDTO{}, err
 	}
+	helper.RankArticles(articles, "score")
 
-	// Use score as query context for metadata
+	paged, total := paginate(articles, pgn)
+
+	for i := range paged {
+		paged[i].Description = s.llm.Summarize(ctx, paged[i].Description)
+	}
+
 	query := fmt.Sprintf("relevance_score >= %.2f", score)
 
-	return buildPaginatedResponse(query, articles, pgn), nil
+	return dto.BuildNewsResponse(
+		query,
+		pgn.Page,
+		pgn.Limit,
+		total,
+		paged,
+	), nil
 }
 
 func (s *NewsServiceImpl) Nearby(ctx context.Context, lat, lon, radius float64, pgn model.Pagination) (dto.NewsResponseDTO, error) {
@@ -63,10 +127,33 @@ func (s *NewsServiceImpl) Nearby(ctx context.Context, lat, lon, radius float64, 
 	if err != nil {
 		return dto.NewsResponseDTO{}, err
 	}
+	helper.ComputeDistances(articles, lat, lon)
+	helper.RankArticles(articles, "nearby")
+
+	paged, total := paginate(articles, pgn)
+
+	for i := range paged {
+		paged[i].Description = s.llm.Summarize(ctx, paged[i].Description)
+	}
+
+	for i, a := range articles {
+		log.Printf(
+			"[rank][nearby] #%d title=%q distance=%.2fkm",
+			i+1,
+			a.Title,
+			a.Distance,
+		)
+	}
 
 	query := fmt.Sprintf("nearby(lat=%.4f, lon=%.4f, radius=%.1fkm)", lat, lon, radius)
 
-	return buildPaginatedResponse(query, articles, pgn), nil
+	return dto.BuildNewsResponse(
+		query,
+		pgn.Page,
+		pgn.Limit,
+		total,
+		paged,
+	), nil
 }
 
 func (s *NewsServiceImpl) GetNews(ctx context.Context, q string, opts model.SearchOptions, pgn model.Pagination) (dto.NewsResponseDTO, error) {
@@ -130,11 +217,32 @@ func (s *NewsServiceImpl) GetNews(ctx context.Context, q string, opts model.Sear
 
 	helper.RankArticles(res, primary)
 
-	for i := range res {
-		res[i].Description = s.llm.Summarize(ctx, res[i].Description)
+	for i, a := range res {
+		log.Printf(
+			"[rank][%s] #%d title=%q relevance=%.2f textScore=%.2f final=%.2f distance=%.2fkm",
+			primary,
+			i+1,
+			a.Title,
+			a.RelevanceScore,
+			a.TextScore,
+			a.RelevanceScore+a.TextScore,
+			a.Distance,
+		)
 	}
 
-	return buildPaginatedResponse(q, res, pgn), nil
+	paged, total := paginate(res, pgn)
+
+	for i := range paged {
+		paged[i].Description = s.llm.Summarize(ctx, paged[i].Description)
+	}
+
+	return dto.BuildNewsResponse(
+		q,
+		pgn.Page,
+		pgn.Limit,
+		total,
+		paged,
+	), nil
 }
 
 func fallbackSearch(ctx context.Context, repo repository.NewsRepository, q string, llmRes model.LLMResult) ([]model.NewsArticle, error) {
@@ -148,7 +256,7 @@ func fallbackSearch(ctx context.Context, repo repository.NewsRepository, q strin
 	return repo.Search(ctx, q)
 }
 
-func buildPaginatedResponse(query string, articles []model.NewsArticle, pgn model.Pagination) dto.NewsResponseDTO {
+func paginate(articles []model.NewsArticle, pgn model.Pagination) ([]model.NewsArticle, int64) {
 
 	page := pgn.Page
 	limit := pgn.Limit
@@ -164,13 +272,5 @@ func buildPaginatedResponse(query string, articles []model.NewsArticle, pgn mode
 		end = len(articles)
 	}
 
-	paged := articles[start:end]
-
-	return dto.BuildNewsResponse(
-		query,
-		page,
-		limit,
-		total,
-		paged,
-	)
+	return articles[start:end], total
 }

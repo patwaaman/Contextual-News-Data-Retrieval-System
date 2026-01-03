@@ -19,4 +19,5 @@ type NewsArticle struct {
 	// Computed (not persisted)
 	Distance  float64 `bson:"-" json:"distance,omitempty"`
 	TextScore float64 `bson:"-" json:"-"`
+	Summary   string  `bson:"-" json:"summary,omitempty"`
 }

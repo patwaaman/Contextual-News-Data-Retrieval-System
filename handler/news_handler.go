@@ -105,9 +105,19 @@ func (h *NewsHandler) Score(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	min, err := strconv.ParseFloat(query, 64)
+	score, err := strconv.ParseFloat(query, 64)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, "invalid query value")
+		writeError(w, http.StatusBadRequest, errconst.ErrInvalidScoreValue.Error())
+		return
+	}
+
+	// Threshold validation
+	if score < constant.MinScore || score > constant.MaxScore {
+		writeError(
+			w,
+			http.StatusBadRequest,
+			errconst.ErrScoreThreshold.Error(),
+		)
 		return
 	}
 
@@ -117,7 +127,7 @@ func (h *NewsHandler) Score(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := h.news.Score(r.Context(), min, pgn)
+	res, err := h.news.Score(r.Context(), score, pgn)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, errconst.ErrGettingScoreNews.Error())
 		return
@@ -132,7 +142,7 @@ func (h *NewsHandler) Nearby(w http.ResponseWriter, r *http.Request) {
 	lonStr := r.URL.Query().Get("lon")
 
 	if latStr == "" || lonStr == "" {
-		writeError(w, http.StatusBadRequest, "lat and lon parameters are required")
+		writeError(w, http.StatusBadRequest, errconst.ErrLatLonRequired.Error())
 		return
 	}
 
@@ -235,8 +245,8 @@ func parsePaginationOptions(r *http.Request) (model.Pagination, error) {
 	q := r.URL.Query()
 
 	pg := model.Pagination{
-		Page:  1,
-		Limit: 5,
+		Page:  constant.DefaultPage,
+		Limit: constant.DefaultLimit,
 	}
 
 	if pStr := q.Get("page"); pStr != "" {

@@ -1,6 +1,9 @@
 package dto
 
-import "news-retrieval/model"
+import (
+	"news-retrieval/model"
+	"strings"
+)
 
 func ToNewsArticleDTO(a model.NewsArticle) NewsArticleDTO {
 	dto := NewsArticleDTO{
@@ -11,7 +14,11 @@ func ToNewsArticleDTO(a model.NewsArticle) NewsArticleDTO {
 		SourceName:      a.Source,
 		Category:        a.Category,
 		RelevanceScore:  a.RelevanceScore,
-		LLMSummary:      a.Description, // already summarized
+		LLMSummary:      a.Summary,
+	}
+
+	if strings.TrimSpace(a.Summary) == "" {
+		dto.LLMSummary = a.Description
 	}
 
 	if len(a.Location.Coordinates) == 2 {

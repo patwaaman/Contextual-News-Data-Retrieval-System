@@ -110,7 +110,7 @@ func (l *OpenAILLMService) Summarize(ctx context.Context, text string) string {
 	ctx, cancel := context.WithTimeout(ctx, 4*time.Second)
 	defer cancel()
 
-	if len(strings.TrimSpace(text)) < 30 {
+	if len(strings.TrimSpace(text)) < 80 {
 		logOpenAI(
 			l.debugOpenAI,
 			"summarize",

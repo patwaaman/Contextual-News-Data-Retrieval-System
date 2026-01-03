@@ -51,13 +51,13 @@ func main() {
 
 	// Explicit REST endpoints (NO LLM)
 	mux.HandleFunc(apiV1+"/search", h.Search)     // ?query=
-	mux.HandleFunc(apiV1+"/category", h.Category) // ?name=
-	mux.HandleFunc(apiV1+"/source", h.Source)     // ?name=
+	mux.HandleFunc(apiV1+"/category", h.Category) // ?query=
+	mux.HandleFunc(apiV1+"/source", h.Source)     // ?query=
 	mux.HandleFunc(apiV1+"/score", h.Score)       // ?min=
 	mux.HandleFunc(apiV1+"/nearby", h.Nearby)     // ?lat=&lon=&radius=
 
 	// Semantic (LLM-powered)
-	mux.HandleFunc(apiV1+"/semantic", h.Semantic) // ?query=&lat=&lon=
+	mux.HandleFunc(apiV1+"/semantic", h.Semantic) // ?query=&lat=&lon=&radius=
 
 	server := &http.Server{
 		Addr:         ":8080",
